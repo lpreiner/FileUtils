@@ -10,7 +10,7 @@ namespace FileUtils.Tests
 		public void BoolConverterTrueReadWrite()
 		{
 			var value = true;
-			var converter = new FieldBoolConverterAttribute(new[] { true.ToString() }, new[] { false.ToString() });
+			var converter = new FieldBooleanConverterAttribute(true.ToString());
 
 			var write = converter.WriteField(value, null);
 			var read = converter.ReadField(write, null);
@@ -22,7 +22,7 @@ namespace FileUtils.Tests
 		public void BoolConverterFalseReadWrite()
 		{
 			var value = false;
-			var converter = new FieldBoolConverterAttribute(new[] { true.ToString() }, new[] { false.ToString() });
+			var converter = new FieldBooleanConverterAttribute(true.ToString(), false.ToString());
 
 			var write = converter.WriteField(value, null);
 			var read = converter.ReadField(write, null);
@@ -31,16 +31,41 @@ namespace FileUtils.Tests
 		}
 
 		[Theory]
-		[InlineData(true, new[] { "YES" }, new[] { "NO" })]
-		[InlineData(false, new[] { "YES" }, new[] { "NO" })]
-		public void BoolConverterCustomTrueReadWrite(bool value, string[] trueValues, string[] falseValues)
+		[InlineData(true, "YES" )]
+		[InlineData(true, "T" )]
+		public void BoolConverterCustomTrueReadWrite(bool value, string trueValue)
 		{
-			var converter = new FieldBoolConverterAttribute(trueValues, falseValues);
+			var converter = new FieldBooleanConverterAttribute(trueValue);
 
 			var write = converter.WriteField(value, null);
 			var read = converter.ReadField(write, null);
 
-			Assert.Equal(read, value);
+			Assert.Equal(trueValue, write);
+			Assert.Equal(value, read);
 		}
+
+		[Theory]
+		[InlineData(false, "F")]
+		[InlineData(false, "NO")]
+		public void BoolConverterCustomFalseReadTest(bool value, string falseValue)
+        {
+			var converter = new FieldBooleanConverterAttribute(new[] { "T" }, new[] { falseValue });
+
+			var write = converter.WriteField(value, null);
+			var read = converter.ReadField(write, null);
+
+			Assert.Equal(falseValue, write);
+			Assert.Equal(value, read);
+        }
+
+		[Fact]
+		public void BoolConverterDefaultTest()
+        {
+			var converter = new FieldBooleanConverterAttribute("test");
+
+			var read = converter.ReadField("NO", null);
+
+			Assert.Equal(false, read);
+        }
 	}
 }
